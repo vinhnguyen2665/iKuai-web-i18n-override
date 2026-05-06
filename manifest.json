@@ -1,0 +1,46 @@
+{
+    "manifest_version": 3,
+    "name": "iKuai Language Change",
+    "version": "1.0.0",
+    "description": "Force iKuai Web UI language to other by overriding x-lang and window.headers.xLang.",
+    "permissions": [
+        "storage",
+        "declarativeNetRequest"
+    ],
+    "host_permissions": [
+        "http://192.168.1.1/*",
+        "https://192.168.1.1/*",
+        "http://*/static/js/first.json",
+        "https://*/static/js/first.json"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://192.168.1.1/*",
+                "https://192.168.1.1/*",
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "inject.js"
+            ],
+            "matches": [
+                "http://192.168.1.1/*",
+                "https://192.168.1.1/*",
+            ]
+        }
+    ],
+    "action": {
+        "default_title": "iKuai Web UI Change Language",
+        "default_popup": "popup.html"
+    }
+}

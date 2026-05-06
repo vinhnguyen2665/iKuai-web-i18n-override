@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>iKuai Force English</title>
+    <style>
+        body {
+            width: 260px;
+            margin: 0;
+            padding: 14px;
+            font-family: Arial, sans-serif;
+            background: #f7f8fa;
+            color: #222;
+        }
+
+        h1 {
+            font-size: 16px;
+            margin: 0 0 12px;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            margin-top: 6px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 13px;
+        }
+
+        button {
+            margin-top: 14px;
+            background: #1d74b2;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16649b;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .row input {
+            width: auto;
+        }
+
+        .note {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>iKuai Force Language</h1>
+
+    <label class="row">
+        <input id="enabled" type="checkbox" />
+        Enable force language
+    </label>
+
+    <label>
+        Language
+        <select id="langCode">
+            <option value="zh-CN">Chinese Simplified - zh-CN</option>
+            <option value="en-US">English - en-US</option>
+            <option value="zh-TW">Chinese Traditional - zh-TW</option>
+        </select>
+    </label>
+
+    <button id="save">Save</button>
+
+    <div class="note">
+        Reload iKuai Web UI after saving.
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>
