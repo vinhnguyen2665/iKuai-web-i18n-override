@@ -2,6 +2,91 @@
 
 Chrome extension nhỏ để bật/đổi ngôn ngữ iKuai Web UI bằng cách override các header và biến runtime mà frontend iKuai đang đọc.
 
+## Clone repo và Thêm Địa Chỉ iKuai
+```command 
+git clone https://github.com/vinhnguyen2665/iKuai-web-i18n-override
+```
+Extension chỉ chạy trên các địa chỉ được khai báo trong [manifest.json](./manifest.json). Nếu iKuai Web UI của bạn không nằm ở các địa chỉ mặc định, cần thêm URL vào các phần sau.
+
+Ví dụ iKuai đang ở:
+
+```text
+http://192.168.10.1/
+```
+
+thì thêm vào `host_permissions`:
+
+```json
+"host_permissions": [
+    "http://192.168.1.1/*",
+    "https://192.168.1.1/*",
+    "http://192.168.10.1/*",
+    "http://*/static/js/first.json",
+    "https://*/static/js/first.json"
+]
+```
+
+Thêm cùng địa chỉ vào `content_scripts.matches` để Chrome inject [content.js](./content.js):
+
+```json
+"content_scripts": [
+    {
+        "matches": [
+            "http://192.168.1.1/*",
+            "https://192.168.1.1/*",
+            "http://192.168.10.1/*"
+        ],
+        "js": [
+            "content.js"
+        ],
+        "run_at": "document_start"
+    }
+]
+```
+
+Thêm cùng địa chỉ vào `web_accessible_resources.matches` để page có thể load [inject.js](./inject.js):
+
+```json
+"web_accessible_resources": [
+    {
+        "resources": [
+            "inject.js"
+        ],
+        "matches": [
+            "http://192.168.1.1/*",
+            "https://192.168.1.1/*",
+            "http://192.168.10.1/*"
+        ]
+    }
+]
+```
+
+Nếu dùng domain reverse proxy, ví dụ:
+
+```text
+https://ikuai.example.com/
+```
+
+thì thêm:
+
+```json
+"https://ikuai.example.com/*"
+```
+
+vào cả 3 nơi trên.
+
+
+## Cài Đặt Extension
+
+1. Mở Chrome/Chromium.
+2. Vào `chrome://extensions`.
+3. Bật `Developer mode`.
+4. Chọn `Load unpacked`.
+5. Chọn thư mục repo này.
+6. Mở iKuai Web UI, chọn ngôn ngữ trong popup extension rồi bấm `Save`.
+
+Sau khi bấm `Save`, extension sẽ lưu cấu hình, cập nhật rule và reload tab hiện tại.
+
 ## Nguyên Lý
 
 iKuai Web UI đã có sẵn cơ chế i18n ở phía frontend. Khi tải file cấu hình ban đầu, thường là:
@@ -104,16 +189,6 @@ Nếu cùng lúc Chrome DNR đã set `x-lang`, rồi `getAllResponseHeaders()` l
 
 Do browser hoặc parser gộp nhiều header cùng tên bằng dấu phẩy. Vì vậy `inject.js` dùng logic upsert: xóa header cũ cùng tên trong chuỗi header rồi thêm lại đúng một dòng.
 
-## Cài Đặt Extension
-
-1. Mở Chrome/Chromium.
-2. Vào `chrome://extensions`.
-3. Bật `Developer mode`.
-4. Chọn `Load unpacked`.
-5. Chọn thư mục repo này.
-6. Mở iKuai Web UI, chọn ngôn ngữ trong popup extension rồi bấm `Save`.
-
-Sau khi bấm `Save`, extension sẽ lưu cấu hình, cập nhật rule và reload tab hiện tại.
 
 ## Override Bằng Reverse Proxy
 

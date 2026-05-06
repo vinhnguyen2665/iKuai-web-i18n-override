@@ -10,7 +10,6 @@
     "host_permissions": [
         "http://192.168.1.1/*",
         "https://192.168.1.1/*",
-        "https://openwrt.zero9vn.com/*",
         "http://*/static/js/first.json",
         "https://*/static/js/first.json"
     ],
@@ -21,8 +20,7 @@
         {
             "matches": [
                 "http://192.168.1.1/*",
-                "https://192.168.1.1/*",
-                "https://openwrt.zero9vn.com/*"
+                "https://192.168.1.1/*"
             ],
             "js": [
                 "content.js"
@@ -37,8 +35,7 @@
             ],
             "matches": [
                 "http://192.168.1.1/*",
-                "https://192.168.1.1/*",
-                "https://openwrt.zero9vn.com/*"
+                "https://192.168.1.1/*"
             ]
         }
     ],
