@@ -12,7 +12,8 @@
     async function loadAndPushConfig() {
         const config = await chrome.storage.local.get({
             enabled: true,
-            langCode: "en-US"
+            langCode: "en-US",
+            supportI18nOverride: false
         });
 
         pushConfig(config);
@@ -29,7 +30,7 @@
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== "local") return;
-        if (!changes.enabled && !changes.langCode) return;
+        if (!changes.enabled && !changes.langCode && !changes.supportI18nOverride) return;
 
         loadAndPushConfig();
     });

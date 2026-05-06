@@ -1,0 +1,19 @@
+# Local history for Visual Studio Code
+.vscode/history/
+
+# Visual Studio Code settings and workspace data
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/code-snippets
+
+# Local History for Visual Studio Code
+.history/
+.lh/
+.codex/
+.agents/
+
+# Built-in search results
+*.code-search

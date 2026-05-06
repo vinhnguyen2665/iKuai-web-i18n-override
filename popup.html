@@ -74,14 +74,22 @@
         Enable force language
     </label>
 
+    <label class="row" style="display: none;">
+        <input id="supportI18nOverride" type="checkbox" checked="false" />
+        Hide/show language switch
+    </label>
+
     <label>
-        Language
+        Forced language
         <select id="langCode">
+            <!-- <option value="">Auto</option> -->
             <option value="zh-CN">Chinese Simplified - zh-CN</option>
             <option value="en-US">English - en-US</option>
             <option value="zh-TW">Chinese Traditional - zh-TW</option>
         </select>
     </label>
+
+
 
     <button id="save">Save</button>
 

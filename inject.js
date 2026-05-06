@@ -1,6 +1,7 @@
 (function () {
     const CONFIG_EVENT = "ikuai-force-language-config";
     const LANG_MAP = {
+        "": "",
         "zh-CN": "1",
         "en-US": "2",
         "zh-TW": "3"
@@ -8,11 +9,33 @@
 
     const state = {
         enabled: true,
-        langCode: "en-US"
+        langCode: "en-US",
+        supportI18nOverride: true
     };
 
     function getForcedLangHeader() {
-        return LANG_MAP[state.langCode] || "2";
+        return LANG_MAP[state.langCode] || "";
+    }
+
+    function shouldOverrideLang() {
+        return state.enabled && Boolean(getForcedLangHeader());
+    }
+
+    function upsertResponseHeader(headers, name, value) {
+        const lowerName = name.toLowerCase();
+        const lines = String(headers || "")
+            .split(/\r?\n/)
+            .filter((line) => {
+                const separatorIndex = line.indexOf(":");
+
+                if (separatorIndex === -1) return Boolean(line.trim());
+
+                return line.slice(0, separatorIndex).trim().toLowerCase() !== lowerName;
+            });
+
+        lines.push(`${name}: ${value}`);
+
+        return `${lines.join("\n")}\n`;
     }
 
     function applyConfig(config) {
@@ -22,8 +45,15 @@
             state.enabled = config.enabled;
         }
 
-        if (typeof config.langCode === "string" && LANG_MAP[config.langCode]) {
+        if (
+            typeof config.langCode === "string" &&
+            Object.prototype.hasOwnProperty.call(LANG_MAP, config.langCode)
+        ) {
             state.langCode = config.langCode;
+        }
+
+        if (typeof config.supportI18nOverride === "boolean") {
+            state.supportI18nOverride = config.supportI18nOverride;
         }
 
         console.log(
@@ -37,19 +67,33 @@
 
         try {
             let originalLang = headers.xLang;
+            let originalSupportI18n = headers.xSupportI18n;
 
             Object.defineProperty(headers, "xLang", {
                 configurable: true,
                 enumerable: true,
                 get() {
-                    return state.enabled ? state.langCode : originalLang;
+                    return shouldOverrideLang() ? state.langCode : originalLang;
                 },
                 set(value) {
                     originalLang = value;
                 }
             });
+
+            Object.defineProperty(headers, "xSupportI18n", {
+                configurable: true,
+                enumerable: true,
+                get() {
+                    return state.enabled && state.supportI18nOverride
+                        ? 1
+                        : originalSupportI18n;
+                },
+                set(value) {
+                    originalSupportI18n = value;
+                }
+            });
         } catch (err) {
-            console.warn("[iKuai Force Language] Cannot patch headers.xLang:", err);
+            console.warn("[iKuai Force Language] Cannot patch window.headers:", err);
         }
 
         return headers;
@@ -95,11 +139,16 @@
         const key = String(name || "").toLowerCase();
         const isFirstJson = this.__ikuai_force_lang_url.includes("/static/js/first.json");
 
-        if (state.enabled && isFirstJson && key === "x-lang") {
+        if (shouldOverrideLang() && isFirstJson && key === "x-lang") {
             return getForcedLangHeader();
         }
 
-        if (state.enabled && isFirstJson && key === "x-support-i18n") {
+        if (
+            state.enabled &&
+            state.supportI18nOverride &&
+            isFirstJson &&
+            key === "x-support-i18n"
+        ) {
             return "1";
         }
 
@@ -111,7 +160,27 @@
         const isFirstJson = this.__ikuai_force_lang_url.includes("/static/js/first.json");
 
         if (state.enabled && isFirstJson) {
-            return `${headers}\nx-lang: ${getForcedLangHeader()}\nx-support-i18n: 1\n`;
+            let forcedHeaders = headers;
+
+            if (shouldOverrideLang()) {
+                forcedHeaders = upsertResponseHeader(
+                    forcedHeaders,
+                    "x-lang",
+                    getForcedLangHeader()
+                );
+            }
+
+            if (state.supportI18nOverride) {
+                forcedHeaders = upsertResponseHeader(
+                    forcedHeaders,
+                    "x-support-i18n",
+                    "1"
+                );
+            }
+
+            if (forcedHeaders !== headers) {
+                return forcedHeaders;
+            }
         }
 
         return headers;
@@ -136,8 +205,12 @@
                         return function (name) {
                             const key = String(name || "").toLowerCase();
 
-                            if (key === "x-lang") return getForcedLangHeader();
-                            if (key === "x-support-i18n") return "1";
+                            if (key === "x-lang" && shouldOverrideLang()) {
+                                return getForcedLangHeader();
+                            }
+                            if (key === "x-support-i18n" && state.supportI18nOverride) {
+                                return "1";
+                            }
 
                             return target.get.call(target, name);
                         };
